@@ -1,0 +1,88 @@
+<!-- asf-control-start -->
+<section id="asf-control" style="max-width:560px;margin:18px auto;padding:16px 18px;background:rgba(18,22,30,.92);border:1px solid rgba(255,255,255,.14);border-radius:12px;color:#e8ecf3;font-family:system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;box-shadow:0 4px 18px rgba(0,0,0,.35);text-align:left">
+  <h2 style="margin:0 0 10px;font-size:16px;font-weight:600;letter-spacing:.3px">ASF 挂机控制</h2>
+  <div id="asf-status-line" style="font-size:14px;line-height:1.6;min-height:22px">状态加载中…</div>
+  <div id="asf-games" style="font-size:14px;line-height:1.6;margin:4px 0 10px;color:#9fe6b0"></div>
+  <button id="asf-reconnect-btn" type="button" style="padding:8px 16px;font-size:14px;font-weight:600;color:#0d1117;background:#58d68d;border:0;border-radius:8px;cursor:pointer;box-shadow:0 2px 8px rgba(88,214,141,.35)">重新连接并继续挂机</button>
+  <div id="asf-msg" style="font-size:12px;line-height:1.6;margin-top:8px;color:#aab3c0;min-height:16px"></div>
+</section>
+<script>
+(function () {
+  var TOKEN = '__UI_TOKEN__';
+  var api = '/asf/api';
+  var statusEl = document.getElementById('asf-status-line');
+  var gamesEl = document.getElementById('asf-games');
+  var msgEl = document.getElementById('asf-msg');
+  var btn = document.getElementById('asf-reconnect-btn');
+
+  function esc(s) {
+    return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) {
+      return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
+    });
+  }
+
+  function fetchJson(path, options) {
+    var opts = options || {};
+    opts.headers = Object.assign({ 'X-UI-Token': TOKEN }, opts.headers || {});
+    return fetch(api + path, opts).then(function (resp) {
+      if (!resp.ok) throw new Error('HTTP ' + resp.status);
+      return resp.json();
+    });
+  }
+
+  function renderStatus(s) {
+    if (!s.asf_reachable) {
+      statusEl.textContent = 'ASF 服务不可达（IPC 未响应）';
+      gamesEl.textContent = '';
+    } else if (!s.connected) {
+      statusEl.textContent = '未连接 Steam（ASF 正在自动重连）';
+      gamesEl.textContent = '';
+    } else {
+      statusEl.textContent = '已连接 Steam，正在挂机';
+      var items = (s.playing || []).map(function (g) {
+        return esc(g.GameName) + ' <span style="opacity:.7">(' + esc(g.AppID) + ')</span>';
+      });
+      gamesEl.innerHTML = items.length ? items.join(' · ') : '（无）';
+      if (s.paused) {
+        gamesEl.innerHTML += '<div style="opacity:.7;margin-top:4px;color:#e6c07b">注：挂卡模块处于暂停（play 手动模式属正常），游戏时长正常累计</div>';
+      }
+    }
+    if (s.farming && s.farming.length) {
+      var farm = s.farming.map(function (g) {
+        return esc(g.GameName) + ' (' + esc(g.AppID) + ')';
+      }).join(' · ');
+      gamesEl.innerHTML += '<div style="opacity:.75;margin-top:4px">正在挂卡：' + farm + '</div>';
+    }
+    msgEl.textContent = '更新于 ' + (s.updated_at || '');
+  }
+
+  function refresh() {
+    return fetchJson('/status').then(renderStatus).catch(function (e) {
+      statusEl.textContent = '状态获取失败（桥接服务可能未启动）';
+      gamesEl.textContent = '';
+      msgEl.textContent = String(e && e.message || e);
+    });
+  }
+
+  btn.addEventListener('click', function () {
+    btn.disabled = true;
+    var old = btn.textContent;
+    btn.textContent = '正在重连…';
+    msgEl.textContent = '';
+    fetchJson('/reconnect', { method: 'POST' }).then(function (s) {
+      msgEl.textContent = (s.notes || []).join(' | ');
+      return refresh();
+    }).catch(function (e) {
+      msgEl.textContent = '重连失败：' + (e && e.message || e);
+      statusEl.textContent = '状态获取失败';
+    }).finally(function () {
+      btn.textContent = old;
+      btn.disabled = false;
+    });
+  });
+
+  refresh();
+  setInterval(refresh, 15000);
+})();
+</script>
+<!-- asf-control-end -->

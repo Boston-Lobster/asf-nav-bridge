@@ -1,0 +1,14 @@
+[Unit]
+Description=ASF Bridge for nav page status & reconnect
+After=network.target asf.service
+
+[Service]
+Type=simple
+ExecStart=/usr/bin/python3 /opt/asf-bridge/asf-bridge.py
+WorkingDirectory=/opt/asf-bridge
+Restart=always
+RestartSec=5
+Environment=PYTHONUNBUFFERED=1
+
+[Install]
+WantedBy=multi-user.target
