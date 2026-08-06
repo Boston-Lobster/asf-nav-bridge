@@ -7,7 +7,7 @@ import os
 import shutil
 import sys
 
-CONF = sys.argv[1] if len(sys.argv) > 1 else "/etc/nginx/sites-available/sillytavern"
+CONF = sys.argv[1] if len(sys.argv) > 1 else "/etc/nginx/sites-available/YOUR_SITE"
 MARKER = "asf-bridge-location"
 
 location_block = """    # asf-bridge-location

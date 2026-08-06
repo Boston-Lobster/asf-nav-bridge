@@ -1,6 +1,6 @@
 # ASF Nav Bridge
 
-> 版本：**v1.0.0**
+> 版本：**v1.0.1**
 
 在个人导航页上为 ArchiSteamFarm 提供「一键重连并继续挂机」按钮与实时状态栏，
 解决 ASF 网页端（ASF-ui）不显示手动 `play` 模式下挂机游戏的问题。
@@ -20,6 +20,18 @@
    脚本会自动：安装 systemd 服务 → 注入 Nginx `/asf/` 路由（443 块）→ 注入导航页 → 自检。
 
 Windows 环境也可直接运行 `deploy.ps1`（SSH 密钥路径可用环境变量 `ASF_SSH_KEY` 指定）。
+
+## 部署前替换的占位符
+
+| 占位符 | 位置 | 说明 |
+|---|---|---|
+| `YOUR_DOMAIN` | `config.example.json`、`deploy.sh` | 你的站点域名（如 example.com） |
+| `YOUR_SERVER_IP` | `deploy.ps1` | 服务器 IP（也可设 `ASF_SERVER_IP` 环境变量） |
+| `YOUR_SSH_KEY_PATH` | `deploy.ps1` | SSH 私钥路径（也可设 `ASF_SSH_KEY` 环境变量） |
+| `YOUR_SITE` | `inject_nginx.py` | 服务导航页的 Nginx 站点配置文件名 |
+| `CHANGE_ME` | `config.json` | ASF IPC 密码与 UI 令牌 |
+
+`ASF_NAV_DOMAIN` 环境变量可覆盖 `deploy.sh` 中的域名占位符。
 
 ## 状态栏说明
 

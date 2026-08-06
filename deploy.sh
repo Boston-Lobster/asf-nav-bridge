@@ -4,6 +4,8 @@ set -e
 
 STAGING=/opt/asf-bridge-staging
 DEST=/opt/asf-bridge
+# 部署前替换为你的域名（或设置环境变量 ASF_NAV_DOMAIN）
+DOMAIN="${ASF_NAV_DOMAIN:-YOUR_DOMAIN}"
 
 echo "== 1/5 安装文件 =="
 mkdir -p "$DEST"
@@ -28,10 +30,10 @@ sleep 1
 
 echo "== 5/5 自检 =="
 TOKEN=$(python3 -c "import json;print(json.load(open('$DEST/config.json'))['ui_token'])" 2>/dev/null || true)
-curl -s -H "X-UI-Token: $TOKEN" --referer "https://YOUR_DOMAIN/" \
+curl -s -H "X-UI-Token: $TOKEN" --referer "https://$DOMAIN/" \
   http://127.0.0.1:17001/asf/api/status
 echo
 curl -s -o /dev/null -w "public /asf/api/status -> %{http_code}\n" \
-  --referer "https://YOUR_DOMAIN/" https://YOUR_DOMAIN/asf/api/status
+  --referer "https://$DOMAIN/" "https://$DOMAIN/asf/api/status"
 systemctl status asf-bridge --no-pager -n 5
 echo "部署完成。"

@@ -21,7 +21,7 @@ import urllib.request
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 
 CONFIG_PATH = os.environ.get("ASF_BRIDGE_CONFIG", "/opt/asf-bridge/config.json")
-VERSION = "1.0.0"
+VERSION = "1.0.1"
 
 config = {}
 _lock = threading.Lock()
