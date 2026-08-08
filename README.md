@@ -1,6 +1,6 @@
 # ASF Nav Bridge
 
-> 版本：**v1.0.1**
+> 版本：**v1.1.0**
 
 在个人导航页上为 ArchiSteamFarm 提供「一键重连并继续挂机」按钮与实时状态栏，
 解决 ASF 网页端（ASF-ui）不显示手动 `play` 模式下挂机游戏的问题。
@@ -9,7 +9,7 @@
 
 - `GET /asf/api/status`：查询 ASF 连接状态、暂停状态、当前挂机游戏
 - `POST /asf/api/reconnect`：自动执行 `resume` + `play`；账号未连接时先重启 ASF 再恢复
-- 导航页卡片：重连按钮 + 每 15 秒自动刷新的状态栏
+- 导航页卡片：重连按钮 + “更新状态”手动刷新按钮 + 每 15 秒自动刷新的状态栏
 - 安全：仅监听本机、Nginx `/asf/` 反代、同源 Referer/Origin 校验 + `X-UI-Token` 头
 
 ## 快速开始

@@ -3,17 +3,21 @@
   <h2 style="margin:0 0 10px;font-size:16px;font-weight:600;letter-spacing:.3px">ASF 挂机控制</h2>
   <div id="asf-status-line" style="font-size:14px;line-height:1.6;min-height:22px">状态加载中…</div>
   <div id="asf-games" style="font-size:14px;line-height:1.6;margin:4px 0 10px;color:#9fe6b0"></div>
-  <button id="asf-reconnect-btn" type="button" style="padding:8px 16px;font-size:14px;font-weight:600;color:#0d1117;background:#58d68d;border:0;border-radius:8px;cursor:pointer;box-shadow:0 2px 8px rgba(88,214,141,.35)">重新连接并继续挂机</button>
+  <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center">
+    <button id="asf-reconnect-btn" type="button" style="padding:8px 16px;font-size:14px;font-weight:600;color:#0d1117;background:#58d68d;border:0;border-radius:8px;cursor:pointer;box-shadow:0 2px 8px rgba(88,214,141,.35)">重新连接并继续挂机</button>
+    <button id="asf-refresh-btn" type="button" style="padding:8px 16px;font-size:14px;font-weight:600;color:#e8ecf3;background:transparent;border:1px solid rgba(255,255,255,.35);border-radius:8px;cursor:pointer">更新状态</button>
+  </div>
   <div id="asf-msg" style="font-size:12px;line-height:1.6;margin-top:8px;color:#aab3c0;min-height:16px"></div>
 </section>
 <script>
 (function () {
-  var TOKEN = '__UI_TOKEN__';
+  var TOKEN = 'CHANGE_ME';
   var api = '/asf/api';
   var statusEl = document.getElementById('asf-status-line');
   var gamesEl = document.getElementById('asf-games');
   var msgEl = document.getElementById('asf-msg');
   var btn = document.getElementById('asf-reconnect-btn');
+  var refreshBtn = document.getElementById('asf-refresh-btn');
 
   function esc(s) {
     return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) {
@@ -78,6 +82,16 @@
     }).finally(function () {
       btn.textContent = old;
       btn.disabled = false;
+    });
+  });
+
+  refreshBtn.addEventListener('click', function () {
+    refreshBtn.disabled = true;
+    var old = refreshBtn.textContent;
+    refreshBtn.textContent = '更新中…';
+    refresh().finally(function () {
+      refreshBtn.textContent = old;
+      refreshBtn.disabled = false;
     });
   });
 
