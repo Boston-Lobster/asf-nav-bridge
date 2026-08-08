@@ -2,12 +2,15 @@
 # -*- coding: utf-8 -*-
 """
 ASF Bridge - 为导航页提供 ASF 状态查询与"重连并继续挂机"接口。
-
   GET  /asf/api/status     -> 当前状态 JSON
   POST /asf/api/reconnect  -> resume + play（必要时先重启 ASF），并返回最新状态
 
-只监听 127.0.0.1，由 Nginx 以 /asf/ 前缀反代；浏览器请求需带同源
+只监听 127.0.0.1，由 Nginx 从 /asf/ 前端反向代理；浏览器请求需带同源
 Referer/Origin 且匹配 ui_token（X-UI-Token 头）。
+
+v1.2.0 变更：优先读取 ASF 插件(AsfPlayStatus)暴露的 /api/playstatus 端点
+（ASF 内存中的真实游玩列表），插件不可达时回退到本配置；重连成功后会
+把目标挂机列表推送到插件内存并持久化。
 """
 
 import json
@@ -21,7 +24,6 @@ import urllib.request
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 
 CONFIG_PATH = os.environ.get("ASF_BRIDGE_CONFIG", "/opt/asf-bridge/config.json")
-VERSION = "1.1.0"
 
 config = {}
 _lock = threading.Lock()
@@ -74,6 +76,33 @@ def configured_play_apps():
     ]
 
 
+def plugin_play_status():
+    """读取 ASF 插件(AsfPlayStatus)内存中的正在游玩列表；失败返回 None。"""
+    try:
+        _, data = asf_request("GET", "/api/playstatus")
+        result = (data or {}).get("Result", {}) or {}
+        return result.get(config.get("bot_name", ""))
+    except Exception:
+        return None
+
+
+def push_plugin_play_status():
+    """把当前目标挂机列表写入 ASF 插件内存并持久化，供导航页实时读取。"""
+    try:
+        _, data = asf_request(
+            "POST",
+            "/api/playstatus",
+            {
+                "Bot": config["bot_name"],
+                "AppIDs": config.get("play_appids", []),
+                "GameNames": config.get("play_game_names", {}),
+            },
+        )
+        return bool(data and data.get("Success"))
+    except Exception:
+        return False
+
+
 def build_status(extra=None):
     info = bot_info()
     out = {
@@ -82,17 +111,23 @@ def build_status(extra=None):
         "paused": bool(info and info.get("CardsFarmer", {}).get("Paused")),
         "farming": [],
         "playing": [],
+        "play_source": "",
         "nickname": (info or {}).get("Nickname", ""),
         "updated_at": time.strftime("%Y-%m-%d %H:%M:%S"),
     }
     if info:
         out["farming"] = info.get("CardsFarmer", {}).get("CurrentGamesFarming", []) or []
         out["nickname"] = info.get("Nickname", "")
-    # 手动 play 模式下 ASF 不会把游戏列入 CurrentGamesFarming，且
-    # CardsFarmer.Paused 恒为 True（挂卡模块暂停，属正常）。
-    # 因此只要账号在线，就按桥接配置显示目标挂机游戏。
-    if out["connected"]:
+
+    # 优先读取 ASF 插件(AsfPlayStatus)内存中的真实游玩列表；
+    # 插件不可达或列表为空时，回退到桥接配置显示。
+    plugin = plugin_play_status()
+    if plugin and plugin.get("CurrentGames"):
+        out["playing"] = plugin["CurrentGames"]
+        out["play_source"] = plugin.get("Source", "")
+    elif out["connected"]:
         out["playing"] = configured_play_apps()
+
     if extra:
         out.update(extra)
     return out
@@ -127,8 +162,12 @@ def do_reconnect():
                 "play %s %s"
                 % (config["bot_name"], ",".join(str(a) for a in config.get("play_appids", [])))
             )
-            notes.append("resume → %s" % (r1 or "已执行"))
-            notes.append("play → %s" % (r2 or "已执行"))
+            notes.append("resume -> %s" % (r1 or "已执行"))
+            notes.append("play -> %s" % (r2 or "已执行"))
+            if push_plugin_play_status():
+                notes.append("插件游玩列表已同步")
+            else:
+                notes.append("插件游玩列表同步失败(端点不可达)")
             success = True
         except Exception as exc:
             notes.append("命令执行失败：%s" % exc)
@@ -193,8 +232,8 @@ def main():
     load_config()
     server = ThreadingHTTPServer((config["listen_host"], config["listen_port"]), Handler)
     print(
-        "ASF bridge v%s listening on %s:%s"
-        % (VERSION, config["listen_host"], config["listen_port"]),
+        "ASF bridge listening on %s:%s"
+        % (config["listen_host"], config["listen_port"]),
         flush=True,
     )
     server.serve_forever()

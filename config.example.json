@@ -4,8 +4,9 @@
   "asf_ipc_url": "http://127.0.0.1:1242",
   "asf_ipc_password": "CHANGE_ME",
   "bot_name": "YOUR_BOT",
-  "play_appids": [123456, 654321],
+  "play_appids": [123456, 654321, 789012],
   "play_game_names": {
+    "123456": "Example Game",
     "123456": "Example Game",
     "654321": "Another Game"
   },

@@ -1,16 +1,21 @@
 # ASF Nav Bridge
 
-> 版本：**v1.1.0**
+> 版本：**v1.2.0**
 
-在个人导航页上为 ArchiSteamFarm 提供「一键重连并继续挂机」按钮与实时状态栏，
-解决 ASF 网页端（ASF-ui）不显示手动 `play` 模式下挂机游戏的问题。
+在个人导航页上为 ArchiSteamFarm 提供“一键重连并继续挂机”按钮与实时状态栏，解决 ASF 网页端（ASF-ui）不显示手动 `play` 模式下挂机游戏的问题。
 
 ## 功能
 
 - `GET /asf/api/status`：查询 ASF 连接状态、暂停状态、当前挂机游戏
 - `POST /asf/api/reconnect`：自动执行 `resume` + `play`；账号未连接时先重启 ASF 再恢复
 - 导航页卡片：重连按钮 + “更新状态”手动刷新按钮 + 每 15 秒自动刷新的状态栏
-- 安全：仅监听本机、Nginx `/asf/` 反代、同源 Referer/Origin 校验 + `X-UI-Token` 头
+- 安全：仅监听本机、Nginx `/asf/` 反向代理、同源 Referer/Origin 校验 + `X-UI-Token` 头
+
+## v1.2.0 变更：真实游玩列表（配合 AsfPlayStatus 插件）
+
+- `GET /asf/api/status` 优先读取 ASF 插件 [AsfPlayStatus](https://github.com/Boston-Lobster/asf-playstatus) 暴露的 `/api/playstatus` 端点（ASF 内存中的真实游玩列表，Source=Farming/Manual）；
+- 重连按钮执行 `resume` + `play` 成功后，会 `POST /api/playstatus` 把目标列表写入插件内存并持久化（响应新增 `play_source` 字段）；
+- 插件不可达或列表为空时，自动回退到本配置的 `play_appids` 显示。
 
 ## 快速开始
 
@@ -35,9 +40,9 @@ Windows 环境也可直接运行 `deploy.ps1`（SSH 密钥路径可用环境变�
 
 ## 状态栏说明
 
-手动 `play` 模式下 ASF 的 `CardsFarmer.Paused` 恒为 `True`（挂卡模块暂停），且不会把
-游戏列入 `CurrentGamesFarming`，因此状态栏在「已连接」时按配置显示目标挂机游戏，
-并如实标注 play 手动模式说明。若 ASF 正在自动挂卡，则附加显示真实挂卡列表。
+手动 `play` 模式下 ASF 的 `CardsFarmer.Paused` 恒为 `True`（挂卡模块暂停），且不会把游戏列入 `CurrentGamesFarming`。
+因此 v1.2.0 起优先以 AsfPlayStatus 插件内存列表为准（重连时自动同步），插件不可用时按配置显示目标挂机游戏。
+若 ASF 正在自动挂卡，则附加显示真实挂卡列表。
 
 ## 项目结构
 
@@ -54,5 +59,5 @@ deploy.sh / deploy.ps1 # 一键部署脚本
 ## 安全提醒
 
 - `config.json` 含 ASF IPC 密码与 UI 令牌，已被 `.gitignore` 排除，请勿提交。
-- UI 令牌同时写死在页面 JS 中，属于「提高门槛」而非强认证；如需更强保护，
+- UI 令牌同时写死在页面 JS 中，属于“提高门槛”而非强认证；如需更强保护，
   可给 `/asf/` 增加 Nginx 基本认证。
