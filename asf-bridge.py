@@ -13,6 +13,9 @@ v1.2.0 变更：优先读取 ASF 插件(AsfPlayStatus)暴露的 /api/playstatus 
 把目标挂机列表推送到插件内存并持久化。
 
 v1.3.0 变更：版本对齐（无功能变更）。
+
+v1.3.1 变更：隐私处理——适配插件输出中的账号名掩码（bot1/bot2...），
+状态接口不再返回账号昵称。
 """
 
 import json
@@ -83,7 +86,10 @@ def plugin_play_status():
     try:
         _, data = asf_request("GET", "/api/playstatus")
         result = (data or {}).get("Result", {}) or {}
-        return result.get(config.get("bot_name", ""))
+        if not result:
+            return None
+        # 隐私处理：插件输出使用掩码 bot1/bot2...，这里按顺序取第一个（当前为单 bot 部署）
+        return next(iter(result.values()))
     except Exception:
         return None
 
@@ -114,12 +120,11 @@ def build_status(extra=None):
         "farming": [],
         "playing": [],
         "play_source": "",
-        "nickname": (info or {}).get("Nickname", ""),
+        "nickname": "",  # 隐私处理：不再返回账号昵称
         "updated_at": time.strftime("%Y-%m-%d %H:%M:%S"),
     }
     if info:
         out["farming"] = info.get("CardsFarmer", {}).get("CurrentGamesFarming", []) or []
-        out["nickname"] = info.get("Nickname", "")
 
     # 优先读取 ASF 插件(AsfPlayStatus)内存中的真实游玩列表；
     # 插件不可达或列表为空时，回退到桥接配置显示。

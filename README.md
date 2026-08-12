@@ -1,6 +1,6 @@
 # ASF Nav Bridge
 
-> 版本：**v1.3.0**
+> 版本：**v1.3.1**
 
 在个人导航页上为 ArchiSteamFarm 提供“一键重连并继续挂机”按钮与实时状态栏，解决 ASF 网页端（ASF-ui）不显示手动 `play` 模式下挂机游戏的问题。
 
@@ -10,6 +10,12 @@
 - `POST /asf/api/reconnect`：自动执行 `resume` + `play`；账号未连接时先重启 ASF 再恢复
 - 导航页卡片：重连按钮 + “更新状态”手动刷新按钮 + 每 15 秒自动刷新的状态栏
 - 安全：仅监听本机、Nginx `/asf/` 反向代理、同源 Referer/Origin 校验 + `X-UI-Token` 头
+
+## v1.3.1 变更：隐私处理
+
+- 适配 AsfPlayStatus v1.2.1 的账号名掩码（插件输出 key 为 `bot1`/`bot2`...，桥接按顺序读取）；
+- `/asf/api/status` 不再返回账号昵称（`nickname` 固定为空字符串）；
+- `config.example.json` 中的 bot 名与游戏列表改为占位符。
 
 ## v1.3.0 变更：版本对齐（无功能变更）
 
