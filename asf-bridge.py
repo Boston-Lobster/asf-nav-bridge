@@ -11,6 +11,8 @@ Referer/Origin 且匹配 ui_token（X-UI-Token 头）。
 v1.2.0 变更：优先读取 ASF 插件(AsfPlayStatus)暴露的 /api/playstatus 端点
 （ASF 内存中的真实游玩列表），插件不可达时回退到本配置；重连成功后会
 把目标挂机列表推送到插件内存并持久化。
+
+v1.3.0 变更：版本对齐（无功能变更）。
 """
 
 import json
