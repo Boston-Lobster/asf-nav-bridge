@@ -44,3 +44,4 @@ else:
 
 with open(NAV, "w", encoding="utf-8") as fp:
     fp.write(html)
+

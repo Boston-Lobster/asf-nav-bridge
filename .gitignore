@@ -3,3 +3,5 @@ known_hosts
 __pycache__/
 *.pyc
 *.bak-asf-bridge
+dist/
+

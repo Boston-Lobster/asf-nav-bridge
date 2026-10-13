@@ -5,6 +5,7 @@
   "asf_ipc_password": "CHANGE_ME",
   "bot_name": "YOUR_BOT",
   "play_appids": [123456, 654321],
+  "reconnect_timeout": 60,
   "play_game_names": {
     "123456": "Example Game",
     "654321": "Another Game"
@@ -12,3 +13,4 @@
   "ui_token": "CHANGE_ME",
   "allowed_origins": ["YOUR_DOMAIN", "www.YOUR_DOMAIN", "localhost"]
 }
+

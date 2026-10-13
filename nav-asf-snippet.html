@@ -42,13 +42,13 @@
       statusEl.textContent = '未连接 Steam（ASF 正在自动重连）';
       gamesEl.textContent = '';
     } else {
-      statusEl.textContent = '已连接 Steam，正在挂机';
+      statusEl.textContent = '已连接 Steam';
       var items = (s.playing || []).map(function (g) {
         return esc(g.GameName) + ' <span style="opacity:.7">(' + esc(g.AppID) + ')</span>';
       });
-      gamesEl.innerHTML = items.length ? items.join(' · ') : '（无）';
-      if (s.paused) {
-        gamesEl.innerHTML += '<div style="opacity:.7;margin-top:4px;color:#e6c07b">注：挂卡模块处于暂停（play 手动模式属正常），游戏时长正常累计</div>';
+      gamesEl.innerHTML = s.play_known ? (items.length ? items.join(' · ') : '（无游玩列表）') : '游玩状态未知（请检查 AsfPlayStatus 插件）';
+      if (s.play_source === 'Manual' && items.length) {
+        gamesEl.innerHTML += '<div style="opacity:.7;margin-top:4px;color:#e6c07b">显示最近同步的手动目标列表；Steam 实际计时请在 Steam 端核对</div>';
       }
     }
     if (s.farming && s.farming.length) {
@@ -74,8 +74,8 @@
     btn.textContent = '正在重连…';
     msgEl.textContent = '';
     fetchJson('/reconnect', { method: 'POST' }).then(function (s) {
-      msgEl.textContent = (s.notes || []).join(' | ');
-      return refresh();
+      renderStatus(s);
+      msgEl.textContent = (s.success ? '恢复成功：' : '恢复失败：') + (s.notes || []).join(' | ');
     }).catch(function (e) {
       msgEl.textContent = '重连失败：' + (e && e.message || e);
       statusEl.textContent = '状态获取失败';
@@ -100,3 +100,4 @@
 })();
 </script>
 <!-- asf-control-end -->
+
