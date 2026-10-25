@@ -58,3 +58,20 @@ UI token 放在浏览器页面中，因此不能代替账户认证。需要限�
 
 `asf-bridge.py`、systemd 单元、配置模板、导航页片段、Nginx/导航页注入脚本、Windows/Linux 部署脚本、tests、打包脚本和发布工作流。
 
+<!-- version-isolation:v1 -->
+## 版本隔离与固定安装
+
+默认分支是持续开发入口。需要固定版本时，请使用对应 Release、版本标签或下表的固定源码分支，不把默认分支当作某个已发布版本。
+
+| 版本 | 固定源码 | 校验与附件 |
+| --- | --- | --- |
+| `v1.4.1` | [`8673fc360784`](https://github.com/Boston-Lobster/asf-nav-bridge/tree/codex/releases/v1.4.1) | [Release](https://github.com/Boston-Lobster/asf-nav-bridge/releases/tag/v1.4.1) |
+
+版本标签与固定源码分支禁止更新和删除；后续修复使用新版本号，不覆盖旧版本。
+
+本次为 7 个已有版本标签建立了独立的 `codex/releases/<标签>` 源码分支；完整标签、提交及分支映射见 [source-versions-20261025.json](https://github.com/Boston-Lobster/asf-nav-bridge/releases/download/v1.4.1/source-versions-20261025.json)，配套提供独立 SHA-256 文件。这个目录快照也包含没有单独创建 Release 的版本标签。
+
+每个历史 Release 增补 `version-isolation-v1.json` 和单独的 SHA-256 文件，记录原有源码提交及附件哈希。原有安装包、依赖分卷、原校验文件和下载地址保持不变。
+仓库开启不可变发布后，今后应先创建草稿，上传并核验全部安装包与校验文件，最后发布；发布后需要修复就递增版本号。GitHub 不会自动追溯锁定历史 Release 的附件。
+下载时使用版本专属地址并校验哈希。源码、运行依赖与安装包应分别标明版本；需要调整依赖包时发布新版本，不复用已发布文件覆盖旧内容。
+<!-- /version-isolation:v1 -->
