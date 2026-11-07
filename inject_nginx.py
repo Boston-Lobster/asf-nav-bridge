@@ -253,6 +253,7 @@ def _location_block(indent, port):
             indent + "# " + MARKER,
             indent + "location /asf/ {",
             inner + f"proxy_pass http://127.0.0.1:{port};",
+            inner + "proxy_read_timeout 360s;",
             inner + "proxy_http_version 1.1;",
             inner + "proxy_set_header Host $host;",
             inner + "proxy_set_header X-Real-IP $remote_addr;",

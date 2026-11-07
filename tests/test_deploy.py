@@ -20,6 +20,20 @@ SPEC.loader.exec_module(inject_nginx)
 
 
 class NginxInjectorTests(unittest.TestCase):
+    def test_generated_location_covers_maximum_reconnect_wait(self):
+        text = "server {\n    listen 443 ssl;\n    server_name example.test;\n}\n"
+        with tempfile.TemporaryDirectory() as directory:
+            conf = self.write_conf(directory, text)
+            changed, removed, _ = inject_nginx.inject(
+                str(conf), ["example.test"], 17055
+            )
+            generated_config = conf.read_text(encoding="utf-8")
+
+        self.assertTrue(changed)
+        self.assertEqual(removed, 0)
+        self.assertIn("location /asf/ {", generated_config)
+        self.assertIn("proxy_read_timeout 360s;", generated_config)
+
     def write_conf(self, directory, content):
         path = Path(directory) / "site.conf"
         path.write_text(content, encoding="utf-8")

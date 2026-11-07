@@ -1,6 +1,6 @@
 # ASF Nav Bridge
 
-> 版本：**v1.4.1** ｜ 配套插件：**AsfPlayStatus >= v1.3.1**
+> 版本：**v1.4.2** ｜ 配套插件：**AsfPlayStatus >= v1.3.1**
 
 为个人导航页提供 ASF 连接状态、挂卡列表和“重新连接并继续挂机”按钮。Python 标准库实现，经 Nginx 同源反向代理提供接口。
 
@@ -12,6 +12,7 @@
 - 正确定位 HTTPS server，部署验证失败会恢复本次 Nginx 配置。
 - 重新部署重启桥接进程；PowerShell 原生命令失败立即停止。
 - 前端保留重连结果，手动列表标为最近同步目标，避免声称 Steam 正在计时。
+- Nginx 上游读取超时设为 360 秒，覆盖桥接配置允许的最长 300 秒重连等待。
 
 完整记录见 [CHANGELOG.md](CHANGELOG.md)。
 
@@ -65,6 +66,7 @@ UI token 放在浏览器页面中，因此不能代替账户认证。需要限�
 
 | 版本 | 固定源码 | 校验与附件 |
 | --- | --- | --- |
+| v1.4.2 | [固定源码分支](https://github.com/Boston-Lobster/asf-nav-bridge/tree/codex/releases/v1.4.2) | [Release](https://github.com/Boston-Lobster/asf-nav-bridge/releases/tag/v1.4.2) |
 | `v1.4.1` | [`8673fc360784`](https://github.com/Boston-Lobster/asf-nav-bridge/tree/codex/releases/v1.4.1) | [Release](https://github.com/Boston-Lobster/asf-nav-bridge/releases/tag/v1.4.1) |
 
 版本标签与固定源码分支禁止更新和删除；后续修复使用新版本号，不覆盖旧版本。

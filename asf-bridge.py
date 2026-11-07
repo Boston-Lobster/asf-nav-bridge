@@ -17,6 +17,7 @@ v1.3.0 变更：版本对齐（无功能变更）。
 v1.3.1 变更：隐私处理——适配插件输出中的账号名掩码（bot1/bot2...），
 状态接口不再返回账号昵称。
 
+v1.4.2：兼容最长 300 秒重连等待的 Nginx 代理超时；
 v1.4.1：依赖 AsfPlayStatus >=1.3.1 的 Play 端点，按目标 bot 查询；
 区分目标列表与当前状态，重连失败不再写入虚假游玩列表。
 """
@@ -32,7 +33,7 @@ import urllib.request
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 
 CONFIG_PATH = os.environ.get("ASF_BRIDGE_CONFIG", "/opt/asf-bridge/config.json")
-VERSION = "1.4.1"
+VERSION = "1.4.2"
 
 config = {}
 _lock = threading.Lock()
